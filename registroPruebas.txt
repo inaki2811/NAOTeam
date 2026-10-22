@@ -1,0 +1,18 @@
+Parando NAO
+
+[MODO PRUEBA SENSOR] Toca la cabeza de NAO para interrumpir y sentarlo...
+
+Sensor detectado. Rutina cancelada
+Deteniendo movimientos
+Sentando robot
+Activar pose de seguridad
+Rutina finalizada
+Parando NAO
+
+[MODO PRUEBA SENSOR] Toca la cabeza de NAO para interrumpir y sentarlo...
+
+Sensor detectado. Rutina cancelada
+Deteniendo movimientos
+Sentando robot
+Activar pose de seguridad
+Rutina finalizada
