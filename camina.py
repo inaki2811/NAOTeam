@@ -21,16 +21,16 @@ TIEMPO_MAX_S = 60.0        # Seguridad: aborta si tarda demasiado
 
 # --- CONSTANTES PID (valores de partida, hay que afinarlos con las pruebas) ---
 # Rumbo (salida = velocidad angular relativa, theta de moveToward)
-KP_RUMBO, KI_RUMBO, KD_RUMBO = 1.0, 0.0, 0.05
+KP_RUMBO, KI_RUMBO, KD_RUMBO = 0, 0.0, 0.05
 MAX_GIRO = 0.2
 # Distancia (salida = velocidad relativa hacia adelante, x de moveToward)
-KP_DIST, KI_DIST, KD_DIST = 1.5, 0.0, 0.0
+KP_DIST, KI_DIST, KD_DIST = 1, 0.0, 0.0
 
 # Configuración de marcha deseada. Se recorta a los límites reales del robot
 # (getMoveConfig "Min"/"Max"), y cada ajuste queda registrado en el log.
 CONFIG_DESEADA = {
-    "MaxStepX": 0.3,
-    "MaxStepY": 0.12,
+    "MaxStepX": 0.08,
+    "MaxStepY": 0.03,
     "StepHeight": 0.8,
     "MaxStepTheta": 0.04,
     "MaxStepFrequency": 0.8,
@@ -38,7 +38,6 @@ CONFIG_DESEADA = {
 
 
 def wrap_pi(a):
-    """Normaliza un ángulo a [-pi, pi]."""
     return math.atan2(math.sin(a), math.cos(a))
 
 
@@ -225,7 +224,7 @@ def main():
             logging.exception("Error al detener el movimiento")
 
         try:
-            pose.goToPosture("Sit", 0.5)
+            pose.goToPosture("Rest", 0.5)
             motion.rest()
         except Exception:
             logging.exception("Error al sentar al robot")
