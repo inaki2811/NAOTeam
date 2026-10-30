@@ -1,3 +1,4 @@
+import collections
 import csv
 import datetime
 import json
@@ -16,12 +17,13 @@ DISTANCIA_OBJETIVO = 5.0   # Metros
 VELOCIDAD_MIN = 0.15       # Evita que el NAO deje de dar pasos antes de llegar
 TOLERANCIA_M = 0.02        # Se considera meta alcanzada a +-2 cm
 PERIODO_S = 0.05           # Periodo del bucle de control
-TIEMPO_MAX_S = 60.0        # Seguridad: aborta si tarda demasiado
-ACELERACION = 1.5          # Rampa de arranque (vel. relativa por segundo): evita sacudidas
+TIEMPO_MAX_S = 120.0       # Seguridad: aborta si tarda demasiado
+ACELERACION = 1.5          # Rampa de arranque (vel. relativa por segundo)
 
 # --- PERFIL DE MARCHA ---
-# "seguro": equivale a lo que ya funcionó en tus logs (~0.06 m/s).
-# "rapido": velocidad completa + inclinación de torso hacia adelante (como al caminar rápido).
+# "seguro": lo que ya funcionó (~0.06 m/s).
+# "estable": intermedio, pasos más cortos y menos frecuentes.
+# "rapido": cerca del límite del robot (~0.19 m/s con vx=1.0). El gobernador lo frena si se balancea.
 PERFIL = "rapido"
 
 PERFILES = {
@@ -32,30 +34,63 @@ PERFILES = {
             "MaxStepTheta": 0.04, "MaxStepFrequency": 0.8,
         },
     },
+    "estable": {
+        "velocidad_x": 0.7,
+        "config": {
+            "MaxStepX": 0.06, "MaxStepY": 0.15, "StepHeight": 0.025,
+            "MaxStepTheta": 0.08, "MaxStepFrequency": 0.85,
+            "TorsoWx": 0.0, "TorsoWy": 0.0,
+        },
+    },
     "rapido": {
         "velocidad_x": 0.9,
         "config": {
             "MaxStepX": 0.079, "MaxStepY": 0.15, "StepHeight": 0.025,
             "MaxStepTheta": 0.08, "MaxStepFrequency": 1.0,
-            "TorsoWx": 0.0, "TorsoWy": 0.04,   # inclinación del torso (rad); +Wy = hacia adelante
+            # Tus logs muestran el torso ya inclinado hacia adelante (+0.02 a +0.04 rad de media)
+            # y balanceos de cabeceo crecientes: se quita la inclinación extra.
+            # Si quieres probar el efecto contrario, usa un valor pequeño negativo (p. ej. -0.02).
+            "TorsoWx": 0.0, "TorsoWy": 0.0,
         },
     },
 }
 
-# --- CONSTANTES PID (valores de partida, afinar con los logs) ---
+# --- CONSTANTES PID ---
 # Rumbo (salida = velocidad angular relativa, theta de moveToward)
 KP_RUMBO, KI_RUMBO, KD_RUMBO = 0.5, 0.0, 0.0
 MAX_GIRO = 0.3
-# Distancia (salida = velocidad relativa hacia adelante). Con Kp=3 empieza a
-# frenar a ~0.33 m de la meta, para no pasarse por la inercia de los pasos.
+ZONA_MUERTA_RUMBO = 0.015  # rad (~0.9 deg): dentro de esto no se corrige, para no perturbar la marcha
+# Distancia (salida = velocidad relativa hacia adelante)
 KP_DIST, KI_DIST, KD_DIST = 2.5, 0.0, 0.0
 
-# --- CABEZA Y ESTABILIDAD ---
+# --- GOBERNADOR DE ESTABILIDAD (ajusta la velocidad según cuánto se balancea el torso) ---
+# La velocidad máxima permitida (vx_lim) baja rápido si el torso se balancea mucho y sube
+# despacio cuando está tranquilo, de modo que se asienta sola en la velocidad más alta estable.
+GOBERNADOR = True
+VX_LIM_INICIAL = 0.6       # empieza conservador y sube si el robot va estable
+VX_LIM_MIN = 0.3           # nunca baja de aquí por el gobernador
+VENTANA_S = 1.5            # ventana para medir la amplitud de balanceo
+AMP_ALTA = 0.10            # rad: por encima, se reduce la velocidad
+AMP_BAJA = 0.06            # rad: por debajo, se permite subir poco a poco
+BAJADA = 0.5               # vel. relativa por segundo que se resta cuando se balancea mucho
+SUBIDA = 0.08              # vel. relativa por segundo que se suma cuando va estable
+ALERTA_RAD = 0.22          # rad: freno inmediato a VX_LIM_MIN
+LIM_CAIDA = 0.35           # rad: se detiene la marcha (inclinación crítica)
+
+# --- CABEZA ---
 DESACTIVAR_VIDA_AUTONOMA = True   # evita que Autonomous Life/BasicAwareness mueva la cabeza
-ESTABILIZAR_CABEZA = True         # la cabeza compensa la inclinación del torso (como un humano)
+ESTABILIZAR_CABEZA = True         # la cabeza compensa la inclinación del torso
 GANANCIA_CABEZA = 1.0
-LIM_CABEZA = 0.3                  # rad, máxima compensación
-LIM_CAIDA = 0.5                   # rad, inclinación del torso que se considera caída
+LIM_CABEZA = 0.2                  # rad, máxima compensación
+
+# --- ESTADO DEL HARDWARE ---
+BATERIA_MIN = 0.20         # por debajo, los motores pierden fuerza y la marcha se vuelve inestable
+TEMP_AVISO = 65.0          # °C en articulaciones de piernas: si se calientan, el robot reduce rigidez
+PERIODO_HW_S = 5.0
+JUNTAS_PIERNA = [
+    "LHipYawPitch", "LHipRoll", "LHipPitch", "LKneePitch", "LAnklePitch", "LAnkleRoll",
+    "RHipYawPitch", "RHipRoll", "RHipPitch", "RKneePitch", "RAnklePitch", "RAnkleRoll",
+]
 
 CLAVES_SENSORES = [
     "Device/SubDeviceList/Head/Touch/Front/Sensor/Value",
@@ -64,6 +99,8 @@ CLAVES_SENSORES = [
     "Device/SubDeviceList/InertialSensor/AngleX/Sensor/Value",
     "Device/SubDeviceList/InertialSensor/AngleY/Sensor/Value",
 ]
+CLAVES_HW = (["Device/SubDeviceList/Battery/Charge/Sensor/Value"] +
+             [f"Device/SubDeviceList/{j}/Temperature/Sensor/Value" for j in JUNTAS_PIERNA])
 
 
 def wrap_pi(a):
@@ -73,6 +110,10 @@ def wrap_pi(a):
 
 def limitar(valor, minimo, maximo):
     return max(minimo, min(maximo, valor))
+
+
+def fmt(valor, decimales=4):
+    return "" if valor is None else f"{valor:.{decimales}f}"
 
 
 class PID:
@@ -96,6 +137,26 @@ def leer_sensores(memory):
     f, m, r, ang_x, ang_y = memory.getListData(CLAVES_SENSORES)
     tocado = (f > 0.5 or m > 0.5 or r > 0.5)
     return tocado, ang_x, ang_y
+
+
+def leer_estado_hw(memory):
+    """Batería (0..1) y temperatura máxima de las articulaciones de las piernas."""
+    try:
+        vals = memory.getListData(CLAVES_HW)
+        bateria = vals[0]
+        temps = [v for v in vals[1:] if v is not None]
+        return bateria, (max(temps) if temps else None)
+    except Exception:
+        logging.warning("No se pudo leer batería/temperaturas", exc_info=True)
+        return None, None
+
+
+def avisar_hw(bateria, temp_max):
+    logging.info("Batería: %s | Temp. máx. piernas: %s °C", fmt(bateria, 2), fmt(temp_max, 1))
+    if bateria is not None and bateria < BATERIA_MIN:
+        logging.warning("Batería baja (%.0f%%): puede causar inestabilidad. Cárgalo.", bateria * 100)
+    if temp_max is not None and temp_max >= TEMP_AVISO:
+        logging.warning("Piernas calientes (%.0f °C): deja enfriar el robot entre pruebas.", temp_max)
 
 
 def ajustar_config(motion, deseada):
@@ -170,8 +231,12 @@ def main():
         "aceleracion": ACELERACION,
         "tolerancia_m": TOLERANCIA_M,
         "Kp_rumbo": KP_RUMBO, "Ki_rumbo": KI_RUMBO, "Kd_rumbo": KD_RUMBO,
-        "max_giro": MAX_GIRO,
+        "max_giro": MAX_GIRO, "zona_muerta_rumbo": ZONA_MUERTA_RUMBO,
         "Kp_dist": KP_DIST, "Ki_dist": KI_DIST, "Kd_dist": KD_DIST,
+        "gobernador": GOBERNADOR,
+        "vx_lim_inicial": VX_LIM_INICIAL, "vx_lim_min": VX_LIM_MIN,
+        "amp_alta": AMP_ALTA, "amp_baja": AMP_BAJA, "bajada": BAJADA, "subida": SUBIDA,
+        "alerta_rad": ALERTA_RAD, "lim_caida": LIM_CAIDA,
         "estabilizar_cabeza": ESTABILIZAR_CABEZA,
         "ganancia_cabeza": GANANCIA_CABEZA,
         "config_deseada": perfil["config"],
@@ -193,19 +258,28 @@ def main():
     x0 = y0 = th0 = None
     c = s = 0.0
     angs_x, angs_y = [], []
+    vx_lim = min(VX_LIM_INICIAL, velocidad_x)
+    vx_lim_min_vista = vx_lim
+    bateria, temp_max = None, None
+    bateria_ini = temp_ini = None
     t_inicio = time.time()
 
     archivo_csv = open(os.path.join(carpeta, "telemetria.csv"), "w", newline="")
     escritor = csv.writer(archivo_csv)
     escritor.writerow(["t", "dt", "x", "y", "theta", "avance", "lateral",
-                       "err_dist", "err_theta", "vx", "w", "ang_x", "ang_y", "cab_pitch"])
+                       "err_dist", "err_theta", "vx", "w", "ang_x", "ang_y", "cab_pitch",
+                       "vx_lim", "amp", "bateria", "temp_max"])
 
     try:
         # 1. PREPARACIÓN
+        bateria, temp_max = leer_estado_hw(memory)
+        bateria_ini, temp_ini = bateria, temp_max
+        avisar_hw(bateria, temp_max)
+
         if DESACTIVAR_VIDA_AUTONOMA:
             desactivar_vida_autonoma(app)
         motion.wakeUp()
-        pose.goToPosture("StandInit", 0.5)   # posturas válidas: Stand, StandInit, StandZero, Crouch, Sit, SitRelax...
+        pose.goToPosture("StandInit", 0.5)   # posturas válidas: Stand, StandInit, StandZero, Crouch, Sit...
         config = ajustar_config(motion, perfil["config"])
         motion.moveInit()
         try:
@@ -227,20 +301,22 @@ def main():
         logging.info("Toca la cabeza en cualquier momento para cancelar.")
 
         t_prev = time.time()
+        t_hw = t_prev
         vx_cmd = 0.0
+        ventana = collections.deque()   # (t, amplitud) de los últimos VENTANA_S segundos
         filas = 0
 
-        # 2. BUCLE PRINCIPAL (PID rumbo + PID distancia + estabilidad + monitor táctil)
+        # 2. BUCLE PRINCIPAL (PID + gobernador de estabilidad + monitor táctil)
         while True:
             tocado, ang_x, ang_y = leer_sensores(memory)
             if tocado:
                 logging.info("[INTERRUPCIÓN] Se tocó la cabeza. Cancelando caminata.")
                 motivo = "tacto"
                 break
-            if abs(ang_x - ax0) > LIM_CAIDA or abs(ang_y - ay0) > LIM_CAIDA:
-                logging.error("Inclinación excesiva (x=%.2f, y=%.2f rad). Posible caída.",
-                              ang_x - ax0, ang_y - ay0)
-                motivo = "caida"
+            rel_x, rel_y = ang_x - ax0, ang_y - ay0
+            if abs(rel_x) > LIM_CAIDA or abs(rel_y) > LIM_CAIDA:
+                logging.error("Inclinación crítica (x=%.2f, y=%.2f rad). Deteniendo.", rel_x, rel_y)
+                motivo = "inclinacion"
                 break
 
             t = time.time()
@@ -250,6 +326,12 @@ def main():
                 break
             dt = max(t - t_prev, 1e-3)
             t_prev = t
+
+            # Estado del hardware, cada PERIODO_HW_S
+            if t - t_hw >= PERIODO_HW_S:
+                t_hw = t
+                bateria, temp_max = leer_estado_hw(memory)
+                avisar_hw(bateria, temp_max)
 
             # Odometría (marco mundo) -> avance y desviación respecto al rumbo inicial
             x, y, th = motion.getRobotPosition(True)
@@ -265,11 +347,35 @@ def main():
 
             err_theta = wrap_pi(th0 - th)
 
-            # Velocidad hacia adelante: PID de distancia + rampa de arranque
-            vx_obj = max(pid_dist.update(err_dist, dt), VELOCIDAD_MIN)
+            # --- Gobernador: amplitud de balanceo del torso en la última ventana ---
+            # (el balanceo lateral normal de cada paso pesa menos que el cabeceo)
+            ventana.append((t, max(abs(rel_y), 0.75 * abs(rel_x))))
+            while ventana and t - ventana[0][0] > VENTANA_S:
+                ventana.popleft()
+            amp = max(a for _, a in ventana)
+            if GOBERNADOR:
+                if amp >= ALERTA_RAD:
+                    if vx_lim > VX_LIM_MIN:
+                        logging.warning("Balanceo alto (%.2f rad): freno inmediato", amp)
+                    vx_lim = VX_LIM_MIN
+                elif amp > AMP_ALTA:
+                    vx_lim -= BAJADA * dt
+                elif amp < AMP_BAJA:
+                    vx_lim += SUBIDA * dt
+                vx_lim = limitar(vx_lim, VX_LIM_MIN, velocidad_x)
+                vx_lim_min_vista = min(vx_lim_min_vista, vx_lim)
+            else:
+                vx_lim = velocidad_x
+
+            # Velocidad hacia adelante: PID de distancia, tope del gobernador, rampa de arranque
+            vx_obj = min(max(pid_dist.update(err_dist, dt), VELOCIDAD_MIN), vx_lim)
             vx = min(vx_obj, vx_cmd + ACELERACION * dt)   # sube con rampa, baja de inmediato
             vx_cmd = vx
-            w = pid_rumbo.update(err_theta, dt)
+
+            # Giro: con zona muerta para no perturbar la marcha por errores diminutos
+            w = 0.0 if abs(err_theta) < ZONA_MUERTA_RUMBO else pid_rumbo.update(err_theta, dt)
+            if w == 0.0:
+                pid_rumbo.integral = 0.0
 
             motion.moveToward(vx, 0.0, w, config)
 
@@ -280,20 +386,20 @@ def main():
                 cab = limitar(-GANANCIA_CABEZA * (ang_y_f - ay0), -LIM_CABEZA, LIM_CABEZA)
                 motion.setAngles(["HeadYaw", "HeadPitch"], [0.0, cab], 0.3)
 
-            angs_x.append(ang_x - ax0)
-            angs_y.append(ang_y - ay0)
+            angs_x.append(rel_x)
+            angs_y.append(rel_y)
             escritor.writerow([f"{t - t_inicio:.3f}", f"{dt:.4f}", f"{x:.4f}", f"{y:.4f}",
                                f"{th:.4f}", f"{avance:.4f}", f"{lateral:.4f}",
                                f"{err_dist:.4f}", f"{err_theta:.4f}",
                                f"{vx:.3f}", f"{w:.3f}",
-                               f"{ang_x - ax0:.4f}", f"{ang_y - ay0:.4f}", f"{cab:.4f}"])
+                               f"{rel_x:.4f}", f"{rel_y:.4f}", f"{cab:.4f}",
+                               f"{vx_lim:.3f}", f"{amp:.4f}", fmt(bateria, 3), fmt(temp_max, 1)])
             filas += 1
             if filas % 20 == 0:
                 archivo_csv.flush()
 
-            print(f"Dist: {avance:.2f}m | Lat: {lateral:+.3f}m | "
-                  f"ErrRumbo: {err_theta:+.4f} | vx: {vx:.2f} | w: {w:+.3f} | "
-                  f"AngY: {ang_y - ay0:+.3f}")
+            print(f"Dist: {avance:.2f}m | Lat: {lateral:+.3f}m | vx: {vx:.2f} (lim {vx_lim:.2f}) | "
+                  f"w: {w:+.3f} | AngY: {rel_y:+.3f} | Amp: {amp:.3f}")
             time.sleep(PERIODO_S)
 
     except KeyboardInterrupt:
@@ -330,6 +436,10 @@ def main():
             "rms_ang_x": rms(angs_x),
             "rms_ang_y": rms(angs_y),
             "max_ang": max([abs(a) for a in angs_x + angs_y], default=None),
+            "vx_lim_final": vx_lim,
+            "vx_lim_minimo": vx_lim_min_vista,
+            "bateria_ini": bateria_ini,
+            "temp_max_ini": temp_ini,
             "medido_cm": None,  # llénalo a mano con cinta métrica
         }
         with open(os.path.join(carpeta, "resultado.json"), "w") as f:
