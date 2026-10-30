@@ -1,0 +1,7 @@
+2026-10-30 15:07:01,579 INFO Corrida en /mnt/c/Users/inaki/NAO/NAOTeam/logs/20261030_150701 (perfil rapido)
+2026-10-30 15:07:04,337 INFO Config de marcha efectiva: [['MaxStepX', 0.079], ['MaxStepY', 0.15], ['StepHeight', 0.025], ['MaxStepTheta', 0.08], ['MaxStepFrequency', 1.0], ['TorsoWx', 0.0], ['TorsoWy', 0.04]]
+2026-10-30 15:07:05,423 INFO Iniciando avance PID. Objetivo: 5.00 m
+2026-10-30 15:07:05,425 INFO Toca la cabeza en cualquier momento para cancelar.
+2026-10-30 15:07:10,873 INFO [INTERRUPCIÓN] Se tocó la cabeza. Cancelando caminata.
+2026-10-30 15:07:11,931 INFO Avance final estable (odometría): 0.659 m
+2026-10-30 15:07:15,450 INFO Fin de la corrida: {'motivo': 'tacto', 'perfil': 'rapido', 'tiempo_s': 13.46, 'avance_final_estable': 0.6589300392534466, 'rms_ang_x': 0.07093085634232961, 'rms_ang_y': 0.08378542371064637, 'max_ang': 0.2366166072897613, 'medido_cm': None}

@@ -12,7 +12,7 @@ NAO_IP = "192.168.0.30"
 NAO_PORT = 9559
 
 # --- PARÁMETROS DEL RETO ---
-DISTANCIA_OBJETIVO = 1.0   # Metros
+DISTANCIA_OBJETIVO = 5.0   # Metros
 VELOCIDAD_MIN = 0.15       # Evita que el NAO deje de dar pasos antes de llegar
 TOLERANCIA_M = 0.02        # Se considera meta alcanzada a +-2 cm
 PERIODO_S = 0.05           # Periodo del bucle de control
@@ -33,11 +33,11 @@ PERFILES = {
         },
     },
     "rapido": {
-        "velocidad_x": 1.0,
+        "velocidad_x": 0.9,
         "config": {
-            "MaxStepX": 0.08, "MaxStepY": 0.15, "StepHeight": 0.025,
+            "MaxStepX": 0.079, "MaxStepY": 0.15, "StepHeight": 0.025,
             "MaxStepTheta": 0.08, "MaxStepFrequency": 1.0,
-            "TorsoWx": 0.0, "TorsoWy": 0.05,   # inclinación del torso (rad); +Wy = hacia adelante
+            "TorsoWx": 0.0, "TorsoWy": 0.04,   # inclinación del torso (rad); +Wy = hacia adelante
         },
     },
 }
@@ -48,7 +48,7 @@ KP_RUMBO, KI_RUMBO, KD_RUMBO = 0.5, 0.0, 0.0
 MAX_GIRO = 0.3
 # Distancia (salida = velocidad relativa hacia adelante). Con Kp=3 empieza a
 # frenar a ~0.33 m de la meta, para no pasarse por la inercia de los pasos.
-KP_DIST, KI_DIST, KD_DIST = 3.0, 0.0, 0.0
+KP_DIST, KI_DIST, KD_DIST = 2.5, 0.0, 0.0
 
 # --- CABEZA Y ESTABILIDAD ---
 DESACTIVAR_VIDA_AUTONOMA = True   # evita que Autonomous Life/BasicAwareness mueva la cabeza

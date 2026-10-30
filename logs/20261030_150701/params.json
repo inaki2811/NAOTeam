@@ -1,0 +1,26 @@
+{
+  "perfil": "rapido",
+  "distancia_objetivo": 5.0,
+  "velocidad_x": 0.9,
+  "velocidad_min": 0.15,
+  "aceleracion": 1.5,
+  "tolerancia_m": 0.02,
+  "Kp_rumbo": 0.5,
+  "Ki_rumbo": 0.0,
+  "Kd_rumbo": 0.0,
+  "max_giro": 0.3,
+  "Kp_dist": 2.5,
+  "Ki_dist": 0.0,
+  "Kd_dist": 0.0,
+  "estabilizar_cabeza": true,
+  "ganancia_cabeza": 1.0,
+  "config_deseada": {
+    "MaxStepX": 0.079,
+    "MaxStepY": 0.15,
+    "StepHeight": 0.025,
+    "MaxStepTheta": 0.08,
+    "MaxStepFrequency": 1.0,
+    "TorsoWx": 0.0,
+    "TorsoWy": 0.04
+  }
+}

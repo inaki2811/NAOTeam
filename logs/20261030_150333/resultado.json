@@ -1,0 +1,10 @@
+{
+  "motivo": "tacto",
+  "perfil": "rapido",
+  "tiempo_s": 13.15,
+  "avance_final_estable": 0.674532221492043,
+  "rms_ang_x": 0.04980230044280129,
+  "rms_ang_y": 0.11384738285173074,
+  "max_ang": 0.32788848131895065,
+  "medido_cm": null
+}
