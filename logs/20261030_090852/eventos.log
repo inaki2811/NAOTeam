@@ -1,0 +1,10 @@
+2026-10-30 09:08:52,687 INFO Corrida en /mnt/c/Users/inaki/NAO/NAOTeam/logs/20261030_090852
+2026-10-30 09:08:53,645 INFO Iniciando avance PID. Objetivo: 1.00 m
+2026-10-30 09:08:53,647 INFO Toca la cabeza en cualquier momento para cancelar.
+2026-10-30 09:08:53,677 ERROR Error durante la ejecución
+Traceback (most recent call last):
+  File "/mnt/c/Users/inaki/NAO/NAOTeam/camina.py", line 194, in main
+    motion.moveToward(vx, 0.0, w, config)
+NameError: name 'config' is not defined
+2026-10-30 09:08:54,744 INFO Avance final estable (odometría): -0.000 m
+2026-10-30 09:08:56,752 INFO Fin de la corrida: {'motivo': 'error', 'tiempo_s': 3.36, 'avance_final_estable': -0.0002783042141536019, 'medido_cm': None}

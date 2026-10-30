@@ -21,10 +21,10 @@ TIEMPO_MAX_S = 60.0        # Seguridad: aborta si tarda demasiado
 
 # --- CONSTANTES PID (valores de partida, hay que afinarlos con las pruebas) ---
 # Rumbo (salida = velocidad angular relativa, theta de moveToward)
-KP_RUMBO, KI_RUMBO, KD_RUMBO = 0.1, 0.0, 0.05
-MAX_GIRO = 0.2
+KP_RUMBO, KI_RUMBO, KD_RUMBO = 0.1, 0, 0.1
+MAX_GIRO = 0.3
 # Distancia (salida = velocidad relativa hacia adelante, x de moveToward)
-KP_DIST, KI_DIST, KD_DIST = 1, 0.0, 0.0
+KP_DIST, KI_DIST, KD_DIST = 1.1, 0.0001, 0.0001
 
 # Configuración de marcha deseada. Se recorta a los límites reales del robot
 # (getMoveConfig "Min"/"Max"), y cada ajuste queda registrado en el log.
@@ -144,9 +144,10 @@ def main():
     try:
         # 1. PREPARACIÓN
         motion.wakeUp()
-        pose.goToPosture("StandInit", 0.5)
+        pose.goToPosture("StandUp", 0.5)
+        motion.setAngles(["HeadYaw", "HeadPitch"], [0.0, 0.0], 0.1)
         config = ajustar_config(motion, CONFIG_DESEADA)
-        motion.moveInit()
+        #motion.moveInit()
 
         x0, y0, th0 = motion.getRobotPosition(True)
         c, s = math.cos(th0), math.sin(th0)
@@ -171,7 +172,7 @@ def main():
                 break
             dt = max(t - t_prev, 1e-3)
             t_prev = t
-
+            
             # Odometría (marco mundo) -> avance y desviación respecto al rumbo inicial
             x, y, th = motion.getRobotPosition(True)
             dx, dy = x - x0, y - y0
@@ -224,8 +225,9 @@ def main():
             logging.exception("Error al detener el movimiento")
 
         try:
-            pose.goToPosture("Rest", 0.5)
+            pose.goToPosture("rest", 0.5)
             motion.rest()
+            
         except Exception:
             logging.exception("Error al sentar al robot")
 
