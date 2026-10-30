@@ -1,0 +1,6 @@
+2026-10-30 08:27:26,532 INFO Corrida en /mnt/c/Users/inaki/NAO/NAOTeam/logs/20261030_082726
+2026-10-30 08:27:29,692 INFO Iniciando avance PID. Objetivo: 1.00 m
+2026-10-30 08:27:29,694 INFO Toca la cabeza en cualquier momento para cancelar.
+2026-10-30 08:27:33,655 INFO [INTERRUPCIÓN] Se tocó la cabeza. Cancelando caminata.
+2026-10-30 08:27:34,720 INFO Avance final estable (odometría): 0.244 m
+2026-10-30 08:27:38,340 INFO Fin de la corrida: {'motivo': 'tacto', 'tiempo_s': 11.28, 'avance_final_estable': 0.2437292608493885, 'medido_cm': None}

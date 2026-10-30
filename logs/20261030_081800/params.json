@@ -1,0 +1,20 @@
+{
+  "distancia_objetivo": 1.0,
+  "velocidad_x": 0.5,
+  "velocidad_min": 0.15,
+  "tolerancia_m": 0.02,
+  "Kp_rumbo": 0,
+  "Ki_rumbo": 0.0,
+  "Kd_rumbo": 0.0,
+  "max_giro": 0.2,
+  "Kp_dist": 1.5,
+  "Ki_dist": 0.0,
+  "Kd_dist": 0.0,
+  "config_deseada": {
+    "MaxStepX": 0.1,
+    "MaxStepY": 0.03,
+    "StepHeight": 0.8,
+    "MaxStepTheta": 0.04,
+    "MaxStepFrequency": 0.9
+  }
+}
