@@ -215,6 +215,25 @@ def crear_corrida(params):
     return carpeta
 
 
+def pedir_medicion():
+    """Pregunta en la terminal la distancia medida con cinta (cm). Enter para omitir."""
+    for _ in range(3):
+        try:
+            texto = input("\nDistancia medida con cinta en cm (Enter para omitir): ").strip().replace(",", ".")
+        except (EOFError, KeyboardInterrupt):
+            return None
+        if not texto:
+            return None
+        try:
+            valor = float(texto)
+            if valor > 0:
+                return valor
+        except ValueError:
+            pass
+        print("Escribe solo un número positivo, por ejemplo 98.5")
+    return None
+
+
 def rms(valores):
     return math.sqrt(sum(v * v for v in valores) / len(valores)) if valores else None
 
@@ -428,6 +447,7 @@ def main():
             logging.exception("Error al pasar a reposo")
 
         archivo_csv.close()
+        medido_cm = pedir_medicion()   # el robot ya está en reposo: mide con cinta y escribe el valor
         resultado = {
             "motivo": motivo,
             "perfil": PERFIL,
@@ -440,7 +460,7 @@ def main():
             "vx_lim_minimo": vx_lim_min_vista,
             "bateria_ini": bateria_ini,
             "temp_max_ini": temp_ini,
-            "medido_cm": None,  # llénalo a mano con cinta métrica
+            "medido_cm": medido_cm,
         }
         with open(os.path.join(carpeta, "resultado.json"), "w") as f:
             json.dump(resultado, f, indent=2)
