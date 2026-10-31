@@ -1,0 +1,21 @@
+2026-10-30 18:09:11,702 INFO Corrida en /mnt/c/Users/inaki/NAO/NAOTeam/logs/20261030_180911 (perfil seguro)
+2026-10-30 18:09:12,251 INFO Batería: 0.96 | Temp. máx. piernas: 83.0 °C
+2026-10-30 18:09:12,253 WARNING Piernas calientes (83 °C): deja enfriar el robot entre pruebas.
+2026-10-30 18:09:14,695 INFO Config de marcha efectiva: [['MaxStepX', 0.075], ['MaxStepY', 0.15], ['StepHeight', 0.03], ['MaxStepTheta', 0.04], ['MaxStepFrequency', 0.8]]
+2026-10-30 18:09:15,919 INFO Iniciando avance PID. Objetivo: 1.50 m
+2026-10-30 18:09:15,921 INFO Toca la cabeza en cualquier momento para cancelar.
+2026-10-30 18:09:21,007 INFO Batería: 0.96 | Temp. máx. piernas: 84.0 °C
+2026-10-30 18:09:21,009 WARNING Piernas calientes (84 °C): deja enfriar el robot entre pruebas.
+2026-10-30 18:09:26,069 INFO Batería: 0.96 | Temp. máx. piernas: 84.0 °C
+2026-10-30 18:09:26,071 WARNING Piernas calientes (84 °C): deja enfriar el robot entre pruebas.
+2026-10-30 18:09:31,115 INFO Batería: 0.96 | Temp. máx. piernas: 84.0 °C
+2026-10-30 18:09:31,116 WARNING Piernas calientes (84 °C): deja enfriar el robot entre pruebas.
+2026-10-30 18:09:36,193 INFO Batería: 0.95 | Temp. máx. piernas: 84.0 °C
+2026-10-30 18:09:36,196 WARNING Piernas calientes (84 °C): deja enfriar el robot entre pruebas.
+2026-10-30 18:09:41,284 INFO Batería: 0.95 | Temp. máx. piernas: 84.0 °C
+2026-10-30 18:09:41,285 WARNING Piernas calientes (84 °C): deja enfriar el robot entre pruebas.
+2026-10-30 18:09:46,306 INFO Batería: 0.95 | Temp. máx. piernas: 84.0 °C
+2026-10-30 18:09:46,307 WARNING Piernas calientes (84 °C): deja enfriar el robot entre pruebas.
+2026-10-30 18:09:47,320 INFO Meta alcanzada (avance 1.487 m).
+2026-10-30 18:09:48,486 INFO Avance final estable (odometría): 1.492 m
+2026-10-30 18:10:16,404 INFO Fin de la corrida: {'motivo': 'meta', 'perfil': 'seguro', 'tiempo_s': 64.16, 'avance_final_estable': 1.4915999041497994, 'rms_ang_x': 0.05609527915859492, 'rms_ang_y': 0.07979100572511842, 'max_ang': 0.2718982771039009, 'vx_lim_final': 0.3, 'vx_lim_minimo': 0.3, 'bateria_ini': 0.9599999785423279, 'temp_max_ini': 83.0, 'medido_cm': 1.55}

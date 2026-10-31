@@ -1,0 +1,13 @@
+2026-10-30 18:51:16,326 INFO Corrida en /mnt/c/Users/inaki/NAO/NAOTeam/logs/20261030_185116 (perfil seguro)
+2026-10-30 18:51:16,691 INFO Batería: 0.99 | Temp. máx. piernas: 51.0 °C
+2026-10-30 18:51:19,047 INFO Config de marcha efectiva: [['MaxStepX', 0.075], ['MaxStepY', 0.15], ['StepHeight', 0.03], ['MaxStepTheta', 0.04], ['MaxStepFrequency', 0.8]]
+2026-10-30 18:51:20,128 INFO Iniciando avance PID. Objetivo: 1.50 m
+2026-10-30 18:51:20,129 INFO Toca la cabeza en cualquier momento para cancelar.
+2026-10-30 18:51:25,157 INFO Batería: 0.98 | Temp. máx. piernas: 51.0 °C
+2026-10-30 18:51:30,218 INFO Batería: 0.98 | Temp. máx. piernas: 51.0 °C
+2026-10-30 18:51:35,236 INFO Batería: 0.98 | Temp. máx. piernas: 51.0 °C
+2026-10-30 18:51:40,244 INFO Batería: 0.98 | Temp. máx. piernas: 51.0 °C
+2026-10-30 18:51:45,258 INFO Batería: 0.98 | Temp. máx. piernas: 52.0 °C
+2026-10-30 18:51:49,988 INFO Meta alcanzada (avance 1.485 m).
+2026-10-30 18:51:51,116 INFO Avance final estable (odometría): 1.487 m
+2026-10-30 18:52:50,757 INFO Fin de la corrida: {'motivo': 'meta', 'perfil': 'seguro', 'tiempo_s': 94.07, 'avance_final_estable': 1.4867468338196577, 'rms_ang_x': 0.05611683802276357, 'rms_ang_y': 0.053775009828443604, 'max_ang': 0.13115549460053444, 'vx_lim_final': 0.3, 'vx_lim_minimo': 0.3, 'bateria_ini': 0.9900000095367432, 'temp_max_ini': 51.0, 'medido_cm': 154.0}

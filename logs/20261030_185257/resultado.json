@@ -1,0 +1,14 @@
+{
+  "motivo": "meta",
+  "perfil": "seguro",
+  "tiempo_s": 103.47,
+  "avance_final_estable": 1.4866875193184337,
+  "rms_ang_x": 0.05583095481425546,
+  "rms_ang_y": 0.056795344626283197,
+  "max_ang": 0.13959217444062233,
+  "vx_lim_final": 0.3,
+  "vx_lim_minimo": 0.3,
+  "bateria_ini": 0.9700000286102295,
+  "temp_max_ini": 51.0,
+  "medido_cm": 150.0
+}

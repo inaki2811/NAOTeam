@@ -13,7 +13,7 @@ NAO_IP = "192.168.0.30"
 NAO_PORT = 9559
 
 # --- PARÁMETROS DEL RETO ---
-DISTANCIA_OBJETIVO = 5.0   # Metros
+DISTANCIA_OBJETIVO = 3   # Metros
 VELOCIDAD_MIN = 0.15       # Evita que el NAO deje de dar pasos antes de llegar
 TOLERANCIA_M = 0.02        # Se considera meta alcanzada a +-2 cm
 PERIODO_S = 0.05           # Periodo del bucle de control
@@ -24,7 +24,7 @@ ACELERACION = 1.5          # Rampa de arranque (vel. relativa por segundo)
 # "seguro": lo que ya funcionó (~0.06 m/s).
 # "estable": intermedio, pasos más cortos y menos frecuentes.
 # "rapido": cerca del límite del robot (~0.19 m/s con vx=1.0). El gobernador lo frena si se balancea.
-PERFIL = "rapido"
+PERFIL = "estable"
 
 PERFILES = {
     "seguro": {
@@ -37,7 +37,7 @@ PERFILES = {
     "estable": {
         "velocidad_x": 0.7,
         "config": {
-            "MaxStepX": 0.06, "MaxStepY": 0.15, "StepHeight": 0.025,
+            "MaxStepX": 0.07, "MaxStepY": 0.15, "StepHeight": 0.025,
             "MaxStepTheta": 0.08, "MaxStepFrequency": 0.85,
             "TorsoWx": 0.0, "TorsoWy": 0.0,
         },
@@ -57,7 +57,7 @@ PERFILES = {
 
 # --- CONSTANTES PID ---
 # Rumbo (salida = velocidad angular relativa, theta de moveToward)
-KP_RUMBO, KI_RUMBO, KD_RUMBO = 0.5, 0.0, 0.0
+KP_RUMBO, KI_RUMBO, KD_RUMBO = 3, 0.0, 0.01
 MAX_GIRO = 0.3
 ZONA_MUERTA_RUMBO = 0.015  # rad (~0.9 deg): dentro de esto no se corrige, para no perturbar la marcha
 # Distancia (salida = velocidad relativa hacia adelante)
